@@ -88,4 +88,18 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_lib_unit_tests.step);
     test_step.dependOn(&run_exe_unit_tests.step);
+
+    const day1_exe = b.addExecutable(.{
+        .name = "aoc2024zigday1",
+        .root_source_file = b.path("src/day1.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    b.installArtifact(day1_exe);
+    const run_day1_cmd = b.addRunArtifact(day1_exe);
+    run_day1_cmd.step.dependOn(b.getInstallStep());
+    if (b.args) |args| {
+        run_day1_cmd.addArgs(args);
+    }
+    run_step.dependOn(&run_day1_cmd.step);
 }
