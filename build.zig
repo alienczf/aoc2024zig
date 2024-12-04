@@ -89,6 +89,7 @@ pub fn build(b: *std.Build) void {
     test_step.dependOn(&run_lib_unit_tests.step);
     test_step.dependOn(&run_exe_unit_tests.step);
 
+    // Day 1
     const day1_exe = b.addExecutable(.{
         .name = "aoc2024zigday1",
         .root_source_file = b.path("src/day1.zig"),
@@ -102,4 +103,28 @@ pub fn build(b: *std.Build) void {
         run_day1_cmd.addArgs(args);
     }
     run_step.dependOn(&run_day1_cmd.step);
+
+    // Day 2
+    const day2_exe = b.addExecutable(.{
+        .name = "aoc2024zigday2",
+        .root_source_file = b.path("src/day2.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    b.installArtifact(day2_exe);
+    const run_day2_cmd = b.addRunArtifact(day2_exe);
+    run_day2_cmd.step.dependOn(b.getInstallStep());
+    if (b.args) |args| {
+        run_day2_cmd.addArgs(args);
+    }
+    run_step.dependOn(&run_day2_cmd.step);
+
+    const day2_unit_tests = b.addTest(.{
+        .root_source_file = b.path("src/day2.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const run_day2_unit_tests = b.addRunArtifact(day2_unit_tests);
+    test_step.dependOn(&run_day2_unit_tests.step);
 }
