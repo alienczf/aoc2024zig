@@ -12,7 +12,7 @@ fn bubbleSort(arr: []i32) void {
         }
     }
 }
-fn readMatrix(path: []const u8, mat: *[1000][8]i32) !usize {
+fn readMatrix(path: []const u8, mat: *[1000][9]i32) !usize {
     const file = try std.fs.cwd().openFile(path, .{});
     defer file.close();
 
@@ -32,6 +32,7 @@ fn readMatrix(path: []const u8, mat: *[1000][8]i32) !usize {
             mat[row][col] = try std.fmt.parseInt(i32, val, 10);
             col += 1;
         }
+        mat[row][8] = @as(i32, @intCast(col));
         row += 1;
     }
 
@@ -61,17 +62,39 @@ fn verifyrow(row: []const i32) bool {
 }
 
 pub fn solve(path: []const u8) !void {
-    var mat: [1000][8]i32 = [_][8]i32{[_]i32{0} ** 8} ** 1000;
-    const i = try readMatrix(path, &mat);
+    var mat: [1000][9]i32 = [_][9]i32{[_]i32{0} ** 9} ** 1000;
+    const rows = try readMatrix(path, &mat);
     var passes: usize = 0;
-    for (0..i) |j| {
-        if (!verifyrow(mat[j][0..])) {
-            // std.debug.print("{d} {d} {d} {d} {d} {d} {d} {d}\n", .{ mat[j][0], mat[j][1], mat[j][2], mat[j][3], mat[j][4], mat[j][5], mat[j][6], mat[j][7] });
+    for (0..rows) |r_id| {
+        const len: usize = @as(usize, @intCast(mat[r_id][8]));
+        if (!verifyrow(mat[r_id][0..len])) {} else {
+            passes += 1;
+        }
+    }
+    std.debug.print("part 1 count={d}\n", .{passes});
+
+    passes = 0;
+    var tmp: [9]i32 = undefined;
+    for (0..rows) |r_id| {
+        const len: usize = @as(usize, @intCast(mat[r_id][8]));
+        if (!verifyrow(mat[r_id][0..len])) {
+            for (0..len) |skip| {
+                var col: usize = 0;
+                for (0..len) |i| {
+                    if (i == skip) continue;
+                    tmp[col] = mat[r_id][i];
+                    col += 1;
+                }
+                if (verifyrow(tmp[0..(len - 1)])) {
+                    passes += 1;
+                    break;
+                }
+            }
         } else {
             passes += 1;
         }
     }
-    std.debug.print("count={d}\n", .{passes});
+    std.debug.print("part 2 count={d}\n", .{passes});
 }
 
 pub fn main() !void {
